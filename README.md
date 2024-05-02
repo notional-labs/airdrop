@@ -1,0 +1,2 @@
+# airdrop
+Traditional Cosmos Airdrop
