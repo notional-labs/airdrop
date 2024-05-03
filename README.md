@@ -8,7 +8,7 @@ Output is in JSON like account:3345t345345ucoin
 ## Usage
 
 ```bash
-go run main.go 6969 --node "https://r-composable--a1f4bb74a50728120e4f8c8054a8bb4c.gw.notionalapi.net:443"
+go run main.go 6969 --node "https://r-composable--apikey.gw.notionalapi.net:443"
 ```
 
 ... or your favorite variation of the above.
