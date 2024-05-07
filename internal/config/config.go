@@ -32,11 +32,11 @@ func LoadCoinID(configPath string) (string, error) {
 }
 
 func LoadAirdropTokenDenom(configPath string) (string, error) {
-	var coinID types.CoinID
-	if _, err := toml.DecodeFile(configPath, &coinID); err != nil {
+	var tokenDenom types.AirdropTokenDenom
+	if _, err := toml.DecodeFile(configPath, &tokenDenom); err != nil {
 		return "", err
 	}
-	return coinID.CoinID, nil
+	return tokenDenom.Denom, nil
 }
 
 func LoadMinimumStakingTokensWorth(configPath string) (string, error) {

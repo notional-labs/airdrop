@@ -2,10 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
-	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/notional-labs/airdrop/internal/chains"
@@ -21,15 +20,20 @@ func main() {
 	// Capture start time
 	startTime := time.Now()
 
-	configPath := flag.String("c", "config.toml", "path to config file")
-	flag.Parse()
+	// Resolve the absolute path for the config file
+	absPath, err := filepath.Abs("")
+	if err != nil {
+		log.Fatalf("Error resolving abs path: %v", err)
+	}
+	absPath = filepath.Dir(filepath.Dir(absPath)) // Move two levels up to get the project root
+	configPath := filepath.Join(absPath, "configs", "config.toml")
 
 	logger, err := logger.Setup()
 	if err != nil {
 		log.Fatalf("Failed to initialize zap logger: %v", err)
 	}
 
-	cfg, err := config.LoadConfig(*configPath)
+	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		logger.Fatal("Failed to load config", zap.Error(err))
 	}
@@ -38,15 +42,16 @@ func main() {
 	if err != nil {
 		logger.Fatal("Failed to connect to GRPC server", zap.Error(err))
 	}
+	defer conn.Close()
 
 	client := query.NewQueryClient(conn)
 
-	blockHeight, err := queries.GetLatestHeight(cfg.GRPCServerAddress)
+	blockHeight, err := queries.GetLatestHeight(cfg.RPCServerAddress + "/status")
 	if err != nil {
 		logger.Fatal("Failed to fetch latest height", zap.Error(err))
 	}
 
-	balanceInfo, err := chains.Composable(client.StakingClient, *configPath, blockHeight, logger)
+	balanceInfo, err := chains.Composable(client.StakingClient, configPath, blockHeight, logger)
 	if err != nil {
 		logger.Fatal("Failed to calculate airdrop for Composable", zap.Error(err))
 	}
@@ -56,5 +61,5 @@ func main() {
 
 	// Calculate and print total time duration
 	duration := time.Since(startTime)
-	fmt.Printf("Total time taken: %v\n", duration)
+	logger.Info("Total time taken: ", zap.String("duration", duration.String()))
 }

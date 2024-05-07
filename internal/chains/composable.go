@@ -50,7 +50,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validators: %w", err)
 	}
-	logger.Info("Total validators: ", zap.Int("total validator", len(validators)))
+	logger.Info("", zap.Int("Total validator", len(validators)))
 
 	for validatorIndex, validator := range validators {
 		delegationsResponse, err := queries.GetValidatorDelegations(stakingClient, validator.OperatorAddress, blockHeight)
@@ -58,7 +58,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 			return nil, fmt.Errorf("failed to query delegate info for validator: %w", err)
 		}
 		total := delegationsResponse.Pagination.Total
-		logger.Info(fmt.Sprintf("Total delegators of validator index %d", validatorIndex), zap.Uint64("total delegators", total))
+		logger.Info(fmt.Sprintf("Validator index: %d", validatorIndex), zap.Uint64("Total delegators", total))
 		delegators = append(delegators, delegationsResponse.DelegationResponses...)
 	}
 
