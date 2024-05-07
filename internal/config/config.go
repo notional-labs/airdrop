@@ -48,9 +48,9 @@ func LoadMinimumStakingTokensWorth(configPath string) (string, error) {
 }
 
 func LoadTotalAirdropTokens(configPath string) (string, error) {
-	var minimumStakingTokensWorth types.MinimumStakingTokensWorth
-	if _, err := toml.DecodeFile(configPath, &minimumStakingTokensWorth); err != nil {
+	var airdropDistributionTokens types.AirdropDistributionTokens
+	if _, err := toml.DecodeFile(configPath, &airdropDistributionTokens); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%d", minimumStakingTokensWorth.USD), nil
+	return fmt.Sprintf("%d", airdropDistributionTokens.TotalTokens), nil
 }

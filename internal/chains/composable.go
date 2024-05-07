@@ -50,7 +50,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validators: %w", err)
 	}
-	logger.Info("", zap.Int("Total validator", len(validators)))
+	logger.Info("Composable", zap.Int("Total validator", len(validators)))
 
 	for validatorIndex, validator := range validators {
 		delegationsResponse, err := queries.GetValidatorDelegations(stakingClient, validator.OperatorAddress, blockHeight)
@@ -65,10 +65,12 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 	usd := sdkmath.LegacyMustNewDecFromStr(minimumStakingTokensWorth)
 	priceSourceURL := priceSource + coinID + "&vs_currencies=usd"
 	tokenPriceInUsd, err := queries.FetchTokenPrice(priceSourceURL, coinID)
+	logger.Info("Composable", zap.String("Token price in usd", tokenPriceInUsd.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch token price: %w", err)
 	}
-	tokenAmountIn20Usd := usd.QuoTruncate(tokenPriceInUsd)
+	amountTokensWorth20Usd := usd.QuoTruncate(tokenPriceInUsd)
+	logger.Info("", zap.String(fmt.Sprintf("Amount tokens worth $%s:", minimumStakingTokensWorth), amountTokensWorth20Usd.String()))
 
 	// Caculate total delegated tokens
 	totalDelegatedTokens := sdkmath.LegacyMustNewDecFromStr("0")
@@ -77,29 +79,37 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
 		// Remove account staking tokens worth less than $20
-		if token.LT(tokenAmountIn20Usd) {
+		if token.LT(amountTokensWorth20Usd) {
 			continue
 		}
 		totalDelegatedTokens = totalDelegatedTokens.Add(token)
 	}
 
+	logger.Info("", zap.String("Total delegated tokens", totalDelegatedTokens.String()))
+
 	airdropTokens := sdkmath.LegacyMustNewDecFromStr(totalAirdropTokens)
+	logger.Info("", zap.String("Total tokens for airdrop", airdropTokens.String()))
 
 	airdropMap := make(map[string]int)
-
 	checkAmount := 0
-
 	balanceInfo := []banktypes.Balance{}
 	for _, delegator := range delegators {
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
 
+		logger.Info(
+			fmt.Sprintf("Delegator address: %s", delegator.Delegation.DelegatorAddress),
+			zap.String("Staking tokens", token.String()),
+		)
+
 		tokenAirdrop := airdropTokens.Mul(token).QuoTruncate(totalDelegatedTokens)
 		bech32Address, err := utils.ConvertBech32Address(delegator.Delegation.DelegatorAddress, tokenDenom)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert Bech32Address: %w", err)
 		}
+
+		logger.Info(fmt.Sprintf("Address: %s", bech32Address), zap.String("Tokens airdrop", tokenAirdrop.String()))
 
 		// Aggregate the tokens staked by the same address across multiple validators
 		amount := airdropMap[bech32Address]
