@@ -28,7 +28,7 @@ Output is in JSON like:
 ```
 
 ## Usage
-To run airdop-tool pass the path of the configuration to the -c flag.
+To run the airdrop tool, specify the path to the configuration file using the -c flag and optionally provide the desired block height using the -h flag (default is the "latest" height).
 
 ```bash
 make build
