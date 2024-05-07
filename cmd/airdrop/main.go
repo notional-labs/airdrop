@@ -8,13 +8,14 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/notional-labs/airdrop/internal/chains"
 	"github.com/notional-labs/airdrop/internal/config"
 	"github.com/notional-labs/airdrop/internal/logger"
 	"github.com/notional-labs/airdrop/internal/queries"
 	"github.com/notional-labs/airdrop/internal/query"
 	"github.com/notional-labs/airdrop/internal/utils"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -67,5 +68,5 @@ func main() {
 
 	// Calculate and print total time duration
 	duration := time.Since(startTime)
-	logger.Info("Total time taken: ", zap.String("duration", duration.String()))
+	logger.Info("", zap.String("Total time taken", duration.String()))
 }

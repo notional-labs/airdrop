@@ -90,8 +90,8 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 	airdropTokens := sdkmath.LegacyMustNewDecFromStr(totalAirdropTokens)
 	logger.Debug("", zap.String("Total tokens for airdrop", airdropTokens.String()))
 
-	airdropMap := make(map[string]int)
-	checkAmount := 0
+	airdropMap := make(map[string]int64)
+	checkAmount := int64(0)
 	balanceInfo := []banktypes.Balance{}
 	for _, delegator := range delegators {
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
@@ -113,8 +113,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 
 		// Aggregate the tokens staked by the same address across multiple validators
 		amount := airdropMap[bech32Address]
-		coins := sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, tokenAirdrop.TruncateInt()))
-		airdropMap[bech32Address] = amount + int(coins.AmountOf(tokenDenom).Int64())
+		airdropMap[bech32Address] = amount + tokenAirdrop.TruncateInt().Int64()
 	}
 	for address, amount := range airdropMap {
 		// Skip addresses that receive less than 1 token
@@ -124,9 +123,9 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 		checkAmount += amount
 		balanceInfo = append(balanceInfo, banktypes.Balance{
 			Address: address,
-			Coins:   sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, sdkmath.NewInt(int64(amount)))),
+			Coins:   sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, sdkmath.NewInt(amount))),
 		})
 	}
-	logger.Info("Total balance: ", zap.Int("total balance", checkAmount))
+	logger.Info("", zap.Int64("Total airdropped tokens", checkAmount))
 	return balanceInfo, nil
 }

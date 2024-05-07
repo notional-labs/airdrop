@@ -7,9 +7,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/notional-labs/airdrop/internal/types"
-	"github.com/notional-labs/airdrop/internal/utils"
-
 	sdkmath "cosmossdk.io/math"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/cosmos/cosmos-sdk/types/grpc"
@@ -17,6 +14,9 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	airdrop "github.com/notional-labs/airdrop/internal/backoff"
 	"google.golang.org/grpc/metadata"
+
+	"github.com/notional-labs/airdrop/internal/types"
+	"github.com/notional-labs/airdrop/internal/utils"
 )
 
 const (
