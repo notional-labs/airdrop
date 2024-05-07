@@ -1,0 +1,24 @@
+# The address prefix used for cosmos based addresses
+address_prefix = "centauri"
+
+# GRPC Server Address
+grpc_server_address = "composable-grpc.polkachu.com:22290"
+
+# RPC Server Address
+rpc_server_address = "https://composable-rpc.polkachu.com"
+
+# Coin ID to fetch token price
+coin_id = "picasso"
+
+# Airdrop token denom
+airdrop_token_denom = "eve"
+
+# Maximum amount of tokens available for distribution as airdrop
+airdrop_distribution = 100000000
+
+# Price source api
+price_source_api = "https://api.coingecko.com/api/v3/simple/price?ids="
+
+# Minimum threshold for staking tokens worth (in USD) to filter out accounts with low stake, 
+# aiming to exclude governance manipulation accounts
+minimum_staking_tokens_worth = 20
