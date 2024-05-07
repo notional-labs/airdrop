@@ -85,10 +85,10 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 		totalDelegatedTokens = totalDelegatedTokens.Add(token)
 	}
 
-	logger.Info("", zap.String("Total delegated tokens", totalDelegatedTokens.String()))
+	logger.Debug("", zap.String("Total delegated tokens", totalDelegatedTokens.String()))
 
 	airdropTokens := sdkmath.LegacyMustNewDecFromStr(totalAirdropTokens)
-	logger.Info("", zap.String("Total tokens for airdrop", airdropTokens.String()))
+	logger.Debug("", zap.String("Total tokens for airdrop", airdropTokens.String()))
 
 	airdropMap := make(map[string]int)
 	checkAmount := 0
@@ -98,7 +98,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
 
-		logger.Info(
+		logger.Debug(
 			fmt.Sprintf("Delegator address: %s", delegator.Delegation.DelegatorAddress),
 			zap.String("Staking tokens", token.String()),
 		)
@@ -109,7 +109,7 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 			return nil, fmt.Errorf("failed to convert Bech32Address: %w", err)
 		}
 
-		logger.Info(fmt.Sprintf("Address: %s", bech32Address), zap.String("Tokens airdrop", tokenAirdrop.String()))
+		logger.Debug(fmt.Sprintf("Address: %s", bech32Address), zap.String("Tokens airdrop", tokenAirdrop.String()))
 
 		// Aggregate the tokens staked by the same address across multiple validators
 		amount := airdropMap[bech32Address]
