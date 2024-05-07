@@ -3,6 +3,7 @@
 You can use this software to take a snapshot of stakers and their bonded tokens at a given block height.  To verify that all accounts are represented, the total of the stakers bonded denom and the total staked supply are verified against each other as a final step.
 
 Output is in JSON like:
+```json
 [
  {
   "address": "eve1nrzfre4u4mgxtz0p6jj5v2z3aa63jfcwpyhn6g",
@@ -24,7 +25,7 @@ Output is in JSON like:
  },
  ...
 ]
-
+```
 
 ## Usage
 To run airdop-tool pass the path of the configuration to the -c flag.
@@ -33,8 +34,6 @@ To run airdop-tool pass the path of the configuration to the -c flag.
 make build
 ./airdrop -c configs/config.toml.example
 ```
-
-... or your favorite variation of the above.
 
 This repo has SDK 47 dependencies and style, but you can change the version of the sdk referenced in go.mod and it should work on 50, 47, 46, and 45.
 
