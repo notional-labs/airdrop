@@ -1,7 +1,4 @@
 # This is example config file for airdropping EVE tokens to Composable stakers
-# The address prefix used for cosmos based addresses
-address_prefix = "centauri"
-
 # GRPC Server Address
 grpc_server_address = "composable-grpc.polkachu.com:22290"
 
