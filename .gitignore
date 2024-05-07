@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+
+#Airdrop tool
+balance.json
+config.toml
