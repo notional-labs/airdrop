@@ -115,14 +115,17 @@ func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight 
 		amount := airdropMap[bech32Address]
 		coins := sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, tokenAirdrop.TruncateInt()))
 		airdropMap[bech32Address] = amount + int(coins.AmountOf(tokenDenom).Int64())
-
-		for address, amount := range airdropMap {
-			checkAmount += amount
-			balanceInfo = append(balanceInfo, banktypes.Balance{
-				Address: address,
-				Coins:   sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, sdkmath.NewInt(int64(amount)))),
-			})
+	}
+	for address, amount := range airdropMap {
+		// Skip addresses that receive less than 1 token
+		if amount == 0 {
+			continue
 		}
+		checkAmount += amount
+		balanceInfo = append(balanceInfo, banktypes.Balance{
+			Address: address,
+			Coins:   sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, sdkmath.NewInt(int64(amount)))),
+		})
 	}
 	logger.Info("Total balance: ", zap.Int("total balance", checkAmount))
 	return balanceInfo, nil
