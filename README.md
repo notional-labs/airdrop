@@ -2,13 +2,36 @@
 
 You can use this software to take a snapshot of stakers and their bonded tokens at a given block height.  To verify that all accounts are represented, the total of the stakers bonded denom and the total staked supply are verified against each other as a final step.
 
-Output is in JSON like account:3345t345345ucoin
+Output is in JSON like:
+[
+ {
+  "address": "eve1nrzfre4u4mgxtz0p6jj5v2z3aa63jfcwpyhn6g",
+  "coins": [
+   {
+    "denom": "eve",
+    "amount": "626"
+   }
+  ]
+ },
+ {
+  "address": "eve1uzaaqwrneh6cwzcmurz5qnu0qfm6mevvmlhs6w",
+  "coins": [
+   {
+    "denom": "eve",
+    "amount": "39"
+   }
+  ]
+ },
+ ...
+]
 
 
 ## Usage
+To run airdop-tool pass the path of the configuration to the -c flag.
 
 ```bash
-go run main.go 6969 --node "https://r-composable--apikey.gw.notionalapi.net:443"
+make build
+./airdrop -c configs/config.toml.example
 ```
 
 ... or your favorite variation of the above.
