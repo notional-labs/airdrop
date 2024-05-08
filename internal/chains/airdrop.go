@@ -69,8 +69,8 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch token price: %w", err)
 	}
-	amountTokensWorth20Usd := usd.QuoTruncate(tokenPriceInUsd)
-	logger.Info("", zap.String(fmt.Sprintf("Amount tokens worth $%s:", minimumStakingTokensWorth), amountTokensWorth20Usd.String()))
+	minimumTokensThreshold := usd.QuoTruncate(tokenPriceInUsd)
+	logger.Info("", zap.String(fmt.Sprintf("Amount tokens worth $%s:", minimumStakingTokensWorth), minimumTokensThreshold.String()))
 
 	// Caculate total delegated tokens
 	totalDelegatedTokens := sdkmath.LegacyMustNewDecFromStr("0")
@@ -78,8 +78,8 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
-		// Remove account staking tokens worth less than $20
-		if token.LT(amountTokensWorth20Usd) {
+		// Remove account staking tokens worth less than threshold
+		if token.LT(minimumTokensThreshold) {
 			continue
 		}
 		totalDelegatedTokens = totalDelegatedTokens.Add(token)
