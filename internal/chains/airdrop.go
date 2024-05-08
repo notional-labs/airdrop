@@ -14,7 +14,7 @@ import (
 	"github.com/notional-labs/airdrop/internal/utils"
 )
 
-func Composable(stakingClient stakingtypes.QueryClient, configPath, blockHeight string, logger *zap.Logger) (
+func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight string, logger *zap.Logger) (
 	[]banktypes.Balance, error,
 ) {
 	// Load config

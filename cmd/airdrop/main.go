@@ -58,7 +58,7 @@ func main() {
 
 	client := query.NewQueryClient(conn)
 
-	balanceInfo, err := chains.Composable(client.StakingClient, *configPath, *blockHeight, logger)
+	balanceInfo, err := chains.Airdrop(client.StakingClient, *configPath, *blockHeight, logger)
 	if err != nil {
 		logger.Fatal("Failed to calculate airdrop for Composable", zap.Error(err))
 	}
