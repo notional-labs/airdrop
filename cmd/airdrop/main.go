@@ -60,7 +60,7 @@ func main() {
 
 	balanceInfo, err := chains.Airdrop(client.StakingClient, *configPath, *blockHeight, logger)
 	if err != nil {
-		logger.Fatal("Failed to calculate airdrop for Composable", zap.Error(err))
+		logger.Fatal("Failed to calculate airdrop", zap.Error(err))
 	}
 
 	fileBalance, _ := json.MarshalIndent(balanceInfo, "", " ")

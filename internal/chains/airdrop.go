@@ -50,7 +50,7 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validators: %w", err)
 	}
-	logger.Info("Composable", zap.Int("Total validator", len(validators)))
+	logger.Info("", zap.Int("Total validator", len(validators)))
 
 	for validatorIndex, validator := range validators {
 		delegationsResponse, err := queries.GetValidatorDelegations(stakingClient, validator.OperatorAddress, blockHeight)
@@ -65,7 +65,7 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 	usd := sdkmath.LegacyMustNewDecFromStr(minimumStakingTokensWorth)
 	priceSourceURL := priceSource + coinID + "&vs_currencies=usd"
 	tokenPriceInUsd, err := queries.FetchTokenPrice(priceSourceURL, coinID)
-	logger.Info("Composable", zap.String("Token price in usd", tokenPriceInUsd.String()))
+	logger.Info("", zap.String("Token price in usd", tokenPriceInUsd.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch token price: %w", err)
 	}
@@ -78,10 +78,6 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
-		// Remove account staking tokens worth less than threshold
-		if token.LT(minimumTokensThreshold) {
-			continue
-		}
 		totalDelegatedTokens = totalDelegatedTokens.Add(token)
 	}
 
@@ -97,6 +93,10 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
 		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
+		// Remove account staking tokens worth less than threshold
+		if token.LT(minimumTokensThreshold) {
+			continue
+		}
 
 		logger.Debug(
 			fmt.Sprintf("Delegator address: %s", delegator.Delegation.DelegatorAddress),
