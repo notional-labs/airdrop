@@ -6,6 +6,7 @@ import (
 
 type Config struct {
 	GRPCServerAddress string `toml:"grpc_server_address"`
+	AddressPrefix     string `toml:"address_prefix"`
 	RPCServerAddress  string `toml:"rpc_server_address"`
 	CoinID            string `toml:"coin_id"`
 }
