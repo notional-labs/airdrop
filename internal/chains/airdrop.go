@@ -117,7 +117,7 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 	}
 	for address, amount := range airdropMap {
 		// Skip addresses that receive less than 1 token
-		if amount == 0 {
+		if amount <= 1000000 { // 1 token = 100000
 			continue
 		}
 		checkAmount += amount
