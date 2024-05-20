@@ -2,6 +2,9 @@
 # GRPC Server Address
 grpc_server_address = "composable-grpc.polkachu.com:22290"
 
+# Address Prefix
+address_prefix = "pica"
+
 # RPC Server Address
 rpc_server_address = "https://composable-rpc.polkachu.com"
 
