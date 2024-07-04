@@ -21,5 +21,6 @@
 go.work
 
 #Airdrop tool
+airdrop
 balance.json
 config.toml
