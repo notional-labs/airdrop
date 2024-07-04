@@ -42,66 +42,69 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 	if err != nil {
 		return nil, fmt.Errorf("failed to load minimum staking tokens worth: %w", err)
 	}
-	//
 
+	// Initialize delegators slice
 	delegators := []stakingtypes.DelegationResponse{}
 
+	// Get validators
 	validators, err := queries.GetValidators(stakingClient, blockHeight)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validators: %w", err)
 	}
-	logger.Info("", zap.Int("Total validator", len(validators)))
+	logger.Info("Fetched validators", zap.Int("totalValidators", len(validators)))
 
+	// Get delegations for each validator
 	for validatorIndex, validator := range validators {
 		delegationsResponse, err := queries.GetValidatorDelegations(stakingClient, validator.OperatorAddress, blockHeight)
 		if err != nil {
 			return nil, fmt.Errorf("failed to query delegate info for validator: %w", err)
 		}
 		total := delegationsResponse.Pagination.Total
-		logger.Info(fmt.Sprintf("Validator index: %d", validatorIndex), zap.Uint64("Total delegators", total))
+		logger.Info("Fetched delegations", zap.Int("validatorIndex", validatorIndex), zap.Uint64("totalDelegators", total))
 		delegators = append(delegators, delegationsResponse.DelegationResponses...)
 	}
 
-	usd := sdkmath.LegacyMustNewDecFromStr(minimumStakingTokensWorth)
+	// Fetch token price in USD
 	priceSourceURL := priceSource + coinID + "&vs_currencies=usd"
 	tokenPriceInUsd, err := queries.FetchTokenPrice(priceSourceURL, coinID)
-	logger.Info("", zap.String("Token price in usd", tokenPriceInUsd.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch token price: %w", err)
 	}
-	minimumTokensThreshold := usd.QuoTruncate(tokenPriceInUsd)
-	logger.Info("", zap.String(fmt.Sprintf("Amount tokens worth $%s:", minimumStakingTokensWorth), minimumTokensThreshold.String()))
+	logger.Info("Fetched token price", zap.String("priceSourceURL", priceSourceURL), zap.String("tokenPriceInUSD", tokenPriceInUsd.String()))
 
-	// Caculate total delegated tokens
+	// Calculate minimum tokens threshold
+	usd := sdkmath.LegacyMustNewDecFromStr(minimumStakingTokensWorth)
+	minimumTokensThreshold := usd.QuoTruncate(tokenPriceInUsd)
+	logger.Info("Calculated minimum tokens threshold", zap.String("minimumStakingTokensWorth", minimumStakingTokensWorth), zap.String("minimumTokensThreshold", minimumTokensThreshold.String()))
+
+	// Calculate total delegated tokens
 	totalDelegatedTokens := sdkmath.LegacyMustNewDecFromStr("0")
 	for _, delegator := range delegators {
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
-		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
+		token := delegator.Delegation.Shares.MulInt(validatorInfo.Tokens).QuoTruncate(validatorInfo.DelegatorShares)
 		totalDelegatedTokens = totalDelegatedTokens.Add(token)
 	}
+	logger.Debug("Calculated total delegated tokens", zap.String("totalDelegatedTokens", totalDelegatedTokens.String()))
 
-	logger.Debug("", zap.String("Total delegated tokens", totalDelegatedTokens.String()))
-
+	// Calculate airdrop tokens
 	airdropTokens := sdkmath.LegacyMustNewDecFromStr(totalAirdropTokens)
-	logger.Debug("", zap.String("Total tokens for airdrop", airdropTokens.String()))
+	logger.Debug("Total tokens for airdrop", zap.String("airdropTokens", airdropTokens.String()))
 
 	airdropMap := make(map[string]int64)
 	checkAmount := int64(0)
 	balanceInfo := []banktypes.Balance{}
+
 	for _, delegator := range delegators {
 		validatorIndex := utils.FindValidatorInfo(validators, delegator.Delegation.ValidatorAddress)
 		validatorInfo := validators[validatorIndex]
-		token := (delegator.Delegation.Shares.MulInt(validatorInfo.Tokens)).QuoTruncate(validatorInfo.DelegatorShares)
+		token := delegator.Delegation.Shares.MulInt(validatorInfo.Tokens).QuoTruncate(validatorInfo.DelegatorShares)
 		// Remove account staking tokens worth less than threshold
 		if token.LT(minimumTokensThreshold) {
 			continue
 		}
 
-		logger.Debug(
-			fmt.Sprintf("Delegator address: %s", delegator.Delegation.DelegatorAddress),
-			zap.String("Staking tokens", token.String()),
-		)
+		logger.Debug("Delegator staking tokens", zap.String("delegatorAddress", delegator.Delegation.DelegatorAddress), zap.String("stakingTokens", token.String()))
 
 		tokenAirdrop := airdropTokens.Mul(token).QuoTruncate(totalDelegatedTokens)
 		bech32Address, err := utils.ConvertBech32Address(delegator.Delegation.DelegatorAddress, tokenDenom)
@@ -109,12 +112,13 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 			return nil, fmt.Errorf("failed to convert Bech32Address: %w", err)
 		}
 
-		logger.Debug(fmt.Sprintf("Address: %s", bech32Address), zap.String("Tokens airdrop", tokenAirdrop.String()))
+		logger.Debug("Airdrop tokens", zap.String("address", bech32Address), zap.String("tokensAirdrop", tokenAirdrop.String()))
 
 		// Aggregate the tokens staked by the same address across multiple validators
 		amount := airdropMap[bech32Address]
 		airdropMap[bech32Address] = amount + tokenAirdrop.TruncateInt().Int64()
 	}
+
 	for address, amount := range airdropMap {
 		// Skip addresses that receive less than 1 token
 		if amount == 0 {
@@ -126,6 +130,7 @@ func Airdrop(stakingClient stakingtypes.QueryClient, configPath, blockHeight str
 			Coins:   sdktypes.NewCoins(sdktypes.NewCoin(tokenDenom, sdkmath.NewInt(amount))),
 		})
 	}
-	logger.Info("", zap.Int64("Total airdropped tokens", checkAmount))
+
+	logger.Info("Airdrop calculation complete", zap.Int64("totalAirdroppedTokens", checkAmount))
 	return balanceInfo, nil
 }
