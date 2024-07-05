@@ -1,3 +1,3 @@
 build: airdrop-tool
 airdrop-tool:
-	go build ./cmd/airdrop
+	go build -o airdropd ./cmd/airdrop

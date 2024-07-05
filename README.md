@@ -32,7 +32,7 @@ To run the airdrop tool, specify the path to the configuration file using the -c
 
 ```bash
 make build
-LOG_LEVEL=debug ./airdrop -c configs/config.toml.example
+LOG_LEVEL=debug ./airdropd -c configs/config.toml.example
 ```
 
 This repo has SDK 47 dependencies and style, but you can change the version of the sdk referenced in go.mod and it should work on 50, 47, 46, and 45.
