@@ -44,7 +44,7 @@ func ConvertBech32Address(dstChainAddress, srcDenom string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error decoding address: %w", err)
 	}
-	newBech32DelAddr, err := bech32.ConvertAndEncode(srcDenom, bz)
+	newBech32DelAddr, err := bech32.ConvertAndEncode("pica", bz)
 	if err != nil {
 		return "", fmt.Errorf("error converting address: %w", err)
 	}
